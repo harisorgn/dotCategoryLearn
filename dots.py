@@ -84,15 +84,6 @@ def gen_prototypes(N_prototypes, N_dots, sz_grid):
             if not check_across(Ps[i,:,:], Ps[:i,:,:], llim_avg=4, ulim_avg=5.5):
                 is_bad_prototypes = True
                 break
-        
-    """
-    for k in range(1, N_prototypes):
-        while True :
-            Ps[k, :, :] = gen_prototype(N_dots, sz_grid)
-
-            if not check_across(Ps[k,:,:], Ps[:k,:,:], llim_avg=4, ulim_avg=5.5):
-                break
-    """
     return Ps
 
 def gen_exemplar(prototype):
