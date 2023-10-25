@@ -66,9 +66,7 @@ const N_exemplars = 129;
 
 var jsPsych = initJsPsych({
     on_finish: function() {
-        jatos.endStudy(jsPsych.data.get().json());
-        //jatos.endStudy(jsPsych.data.get().json());
-        //jatos.endStudy(jsPsych.data.get().json());
+        jsPsych.data.get().localSave('csv','tst.csv');
     }
 })
 
@@ -174,6 +172,4 @@ var trials = {
 };
 timeline.push(trials)
 
-jatos.onLoad(() => {
-  jsPsych.run(timeline);
-});
+jsPsych.run(timeline);
