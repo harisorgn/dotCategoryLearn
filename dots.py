@@ -72,7 +72,7 @@ def gen_prototype(N_dots, sz_grid):
 
     return P
 
-def gen_prototypes(N_prototypes, N_dots, sz_grid):
+def gen_prototypes(N_prototypes, N_dots, sz_grid, llim, ulim):
     Ps = np.zeros((N_prototypes, N_dots, 2))
 
     is_bad_prototypes = True
@@ -81,17 +81,12 @@ def gen_prototypes(N_prototypes, N_dots, sz_grid):
         Ps[0, :, :] = gen_prototype(N_dots, sz_grid)
         for i in range(1, N_prototypes):
             Ps[i, :, :] = gen_prototype(N_dots, sz_grid)
-            if not check_across(Ps[i,:,:], Ps[:i,:,:], llim_avg=4, ulim_avg=5.5):
+            if not check_across(Ps[i,:,:], Ps[:i,:,:], llim_avg=llim, ulim_avg=ulim):
                 is_bad_prototypes = True
                 break
     return Ps
 
-def gen_exemplar(prototype):
-    probs_easy = [0.63, 0.19, 0.13, 0.03, 0.02]
-    #probs_easy = [0.59, 0.20, 0.16, 0.03, 0.02]
-    probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
-    probs = probs_easy
-
+def gen_exemplar(prototype, probs):
     exemplar = np.zeros(prototype.shape)
 
     for (i, dot) in enumerate(prototype):
@@ -110,28 +105,18 @@ def gen_exemplar(prototype):
 
     return exemplar
         
-def gen_exemplars(N_exemplars, prototype):
+def gen_exemplars(N_exemplars, prototype, probs):
     exs = np.zeros((N_exemplars, prototype.shape[0], prototype.shape[1]))
 
     is_bad_exemplars = True
     while is_bad_exemplars:
         is_bad_exemplars = False
-        exs[0, :, :] = gen_exemplar(prototype)
+        exs[0, :, :] = gen_exemplar(prototype, probs)
         for i in range(1, N_exemplars):
-            exs[i, :, :] = gen_exemplar(prototype)
-            if not check_across(exs[i,:,:], exs[:i,:,:], llim_avg=5.1, ulim_avg=7.1):
+            exs[i, :, :] = gen_exemplar(prototype, probs)
+            if not check_across(exs[i,:,:], exs[:i,:,:], N_thrs_dots=2):
                 is_bad_exemplars = True
                 break
-    """"
-    exs[0, :, :] = gen_exemplar(prototype)
-
-    for k in range(1, N_exemplars):
-        while True :
-            exs[k, :, :] = gen_exemplar(prototype)
-
-            if not check_across(exs[k,:,:], exs[:k,:,:], N_thrs_dots=2):
-                break
-    """
     return exs
 
 
@@ -159,11 +144,17 @@ N_dots = 7
 N_exemplars = 100
 sz_grid = (26, 26)
 
-Ps = gen_prototypes(N_prototypes, N_dots, sz_grid)
+llim = 3
+ulim = 4.5
+probs_easy = [0.63, 0.19, 0.13, 0.03, 0.02]
+#probs_easy = [0.59, 0.20, 0.16, 0.03, 0.02]
+probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
+
+Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim, ulim=ulim)
 
 exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
-    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:])
+    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_hard)
 
 pack_name = gen_folder_name('./stimuli/pack')
 os.mkdir(pack_name)
