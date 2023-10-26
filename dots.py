@@ -87,8 +87,11 @@ def gen_prototypes(N_prototypes, N_dots, sz_grid):
     return Ps
 
 def gen_exemplar(prototype):
-    probs = [0.63, 0.19, 0.13, 0.03, 0.02]
-    #probs = [0.59, 0.20, 0.16, 0.03, 0.02]
+    probs_easy = [0.63, 0.19, 0.13, 0.03, 0.02]
+    #probs_easy = [0.59, 0.20, 0.16, 0.03, 0.02]
+    probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
+    probs = probs_easy
+
     exemplar = np.zeros(prototype.shape)
 
     for (i, dot) in enumerate(prototype):
@@ -153,8 +156,8 @@ def plot(P, sz_grid, filename, show=False, save=True):
 
 N_prototypes = 2
 N_dots = 7
-N_exemplars = 129
-sz_grid = (20, 20)
+N_exemplars = 100
+sz_grid = (26, 26)
 
 Ps = gen_prototypes(N_prototypes, N_dots, sz_grid)
 
@@ -162,7 +165,7 @@ exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
     exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:])
 
-pack_name = gen_folder_name('pack')
+pack_name = gen_folder_name('./stimuli/pack')
 os.mkdir(pack_name)
 
 for i in range(0, N_prototypes):
