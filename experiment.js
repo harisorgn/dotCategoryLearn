@@ -159,9 +159,10 @@ var feedback = {
     stimulus: function(){
         const last_trial = jsPsych.data.get().last(1).values()[0];
         if(last_trial.correct){
-            return `<p> <font size="4vw"> Correct category! </font> <br> <br> <font color="green" size="7vw"> +10 points </font> </p>`;
+            return `<p> <font color="green" size="4vw"> Correct category! </font> <br> <br> <font color="green" size="7vw"> +10 points </font> </p>`;
         } else {
-            return `<p> <font size="4vw"> Wrong category! </font> <br> <br> <font color="red" size="7vw"> -10 points </font> </p>`;
+            //return `<p> <font size="4vw"> Wrong category! </font> <br> <br> <font color="red" size="7vw"> -10 points </font> </p>`;
+            return `<p> <font color="red" size="4vw"> Wrong category! </font> </p>`;
         }
     },
     data: {task: 'feedback'}
