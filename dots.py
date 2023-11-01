@@ -19,7 +19,7 @@ def check_within(new_dot, prototype):
     x_new, y_new = new_dot
     for dot in prototype:
         x, y = dot
-        dist = np.linalg.norm([x - x_new, y - y_new], ord=1)
+        dist = np.linalg.norm([x - x_new, y - y_new], ord=2)
         if dist < thrs:
             return True
     return False
@@ -98,6 +98,9 @@ def gen_exemplar(prototype, probs):
         dot_exemplar[not idx_offset] += np.random.randint(-offset, offset + 1)
 
         while check_within(dot_exemplar, exemplar[:i]):
+            offset = np.random.choice(range(1, len(probs) + 1), p = probs)
+            idx_offset = np.random.choice([0, 1])
+
             dot_exemplar = np.copy(dot)
             dot_exemplar[idx_offset] += np.random.choice([-offset, offset])
             dot_exemplar[not idx_offset] += np.random.randint(-offset, offset + 1)
@@ -139,22 +142,24 @@ def plot(P, sz_grid, filename, show=False, save=True):
 
     plt.close(fig)
 
-N_prototypes = 2
+N_prototypes = 4
 N_dots = 7
 N_exemplars = 100
-sz_grid = (26, 26)
+sz_grid = (16, 16)
 
-llim = 3
-ulim = 4.5
-probs_easy = [0.63, 0.19, 0.13, 0.03, 0.02]
-#probs_easy = [0.59, 0.20, 0.16, 0.03, 0.02]
+llim_easy = 4
+ulim_easy = 5.5
+probs_easy = [0.59, 0.20, 0.16, 0.03, 0.02]
+
+llim_easy = 3
+ulim_easy = 4.5
 probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
 
-Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim, ulim=ulim)
+Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_easy, ulim=ulim_easy)
 
 exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
-    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_hard)
+    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_easy)
 
 pack_name = gen_folder_name('./stimuli/pack')
 os.mkdir(pack_name)
