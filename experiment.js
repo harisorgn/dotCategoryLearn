@@ -1,33 +1,48 @@
-function wrap_choices_debug_in_html(choices, category, exemplar){
+function wrap_choices_debug_in_html(choices, category, exemplar, score){
     txt = `
+        ${wrap_score_in_html(score)}
         <img class="left_choice" src=${choices[0]}></img>
         <img class="right_choice" src=${choices[1]}></img>
         <p>
             cat: ${category} <br> ex: ${exemplar}
         </p>
-    `
+    `;
     return txt
 }
 
-function wrap_choices_in_html(choices){
+function wrap_choices_in_html(choices, score){
     txt = `
+        ${wrap_score_in_html(score)}
         <img class="left_choice" src=${choices[0]}></img>
         <img class="right_choice" src=${choices[1]}></img>
-    `
+    `;
     return txt
 }
 
-function wrap_stim_in_html(stimulus){
-    txt = `<img class="stim" src=${stimulus}></img>`
+function wrap_stim_in_html(stimulus, score){
+    txt = `
+        ${wrap_score_in_html(score)}
+        <img class="stim" src=${stimulus}></img>
+    `;
+    return txt
+}
 
+function wrap_score_in_html(score){
+    txt = `
+        <div style="text-align: center; position: fixed; top: 5vh; left: 40vw;">
+            <div style="margin:0 auto; width: 20vw; top: 8vh; font-size: 1vw"> 
+                Current score : <font color="green"> ${score} points </font>
+            </div>
+        </div>
+    `;
     return txt
 }
 
 function wrap_wrong_feedback_in_html(stimulus, category){
     txt = (category == 1) ?
         `<img class="left_stim" src=${stimulus}></img>`: 
-        `<img class="right_stim" src=${stimulus}></img>`
-
+        `<img class="right_stim" src=${stimulus}></img>
+    `;
     return txt
 }
 
@@ -57,34 +72,40 @@ function exemplar_stimuli(indices, stim_path, pack_ID, category){
     );
 }
 
-const DEBUG_MODE = true
-var is_time_out = false;
-const time_experiment = 0.5; // minutes
+const IS_DEBUG = false
+const IS_ONLINE = true
+const time_experiment = 10; // minutes
 const T_exp = time_experiment * 60 * 1000; // ms 
-const N_stim_packs = 2;
-const N_exemplars = 129;
+const N_exemplars = 100;
 
-var jsPsych = initJsPsych({
-    on_finish: function() {
-        jatos.endStudy(jsPsych.data.get().json());
-        //jatos.endStudy(jsPsych.data.get().json());
-        //jatos.endStudy(jsPsych.data.get().json());
-    }
-})
-
-var timeline = [];
-
-setTimeout(
-    function(){
-        jsPsych.endExperiment("The experiment has concluded.");
-    }, 
-    T_exp
-);
+var is_time_out = false;
+var score = 0;
 
 var timeline = []; 
 
-var pack_ID = jsPsych.randomization.sampleWithoutReplacement(range(1, N_stim_packs), 1)[0]
+var pack_ID = "easy"
 var stim_path = "./stimuli/" ;
+
+if (IS_ONLINE){
+    var jsPsych = initJsPsych({
+        on_finish: function() {
+            jatos.endStudy(jsPsych.data.get().csv());
+        }
+    })
+}else{
+    var jsPsych = initJsPsych({
+        on_finish: function() {
+            jsPsych.data.get().localSave('csv','tst.csv');
+        }
+    })
+}
+
+setTimeout(
+    function(){
+        jsPsych.endExperiment(`<p> The experiment has concluded. <br> Thank you for participating! </p>`);
+    }, 
+    T_exp
+);
 
 const stimuli_cat_1 = exemplar_stimuli(range(1, N_exemplars), stim_path, pack_ID, 1);
 const stimuli_cat_2 = exemplar_stimuli(range(1, N_exemplars), stim_path, pack_ID, 2);
@@ -107,28 +128,47 @@ timeline.push(welcome)
 
 var instructions = {
   type: jsPsychHtmlKeyboardResponse,
-  stimulus: "<p>You will be shown a collection of dots. Each set of dots will belong to one of two categories: category A or category B.<br>You will not know in advance which category the given set of dots belongs to.</br></p><p>When you are shown a set of dots, categorize them into category A (left arrow key) or category B (right arrow key)</br>as quickly as possible.</p><p>If your choice was correct, you will see the feedback \"Correct!\"<br>If your choice was incorrect, you will see the dots displayed in the category they actually belong in.</br></p><p>Your goal is to categorize as many sets of dots correctly as possible.</p><p>Press any key to begin.</p>",
+  stimulus: `<p>You will be shown images and each image will contain a set of black dots. Each image will belong to one of two categories: category A or category B.
+            <br>You will not know in advance which category the given collection of dots belongs to.</p>
+            <p>After you see an image you will be asked to categorize it into <b>category A (by pressing the left arrow key)</b> or <b>category B (by pressing the right arrow key)</b>
+            as quickly as possible.</p>
+            <p>After you make a choice you will receive feedback telling you whether you matched the image to the correct category or not.</p>
+            <p>Your goal is to categorize as many sets of dots correctly as possible.</p>
+            <p>Press any key to begin.</p>`,
   data: {task: 'introduction'}
 };
 timeline.push(instructions)
 
-var fixation = {
+var ITI = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: '<div style="font-size:60px;">+</div>',
+    stimulus: function (){
+        return `
+            ${wrap_score_in_html(score)}
+            <div style="font-size:60px;">+</div>
+        `
+    },
     choices: "NO_KEYS",
     trial_duration: 350,
-    data: {task: 'fixation'}
+    data: {task: 'ITI'}
 };
 
 var test_stim = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: function (){
-        return wrap_stim_in_html(jsPsych.timelineVariable('stimulus'))
+        return wrap_stim_in_html(jsPsych.timelineVariable('stimulus'), score)
     },
     choices: "NO_KEYS",
     trial_duration: 1000,
-    post_trial_gap : 1000,
     data: {task : 'stimulus'}
+};
+
+var blank = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: function (){
+        return `${wrap_score_in_html(score)}`
+    },
+    choices: "NO_KEYS",
+    trial_duration: 1000,
 };
 
 var choice_stimuli = [stim_path + "A.png", stim_path + "B.png"]
@@ -136,9 +176,9 @@ var choice_stimuli = [stim_path + "A.png", stim_path + "B.png"]
 var test_choices = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: function (){
-        return DEBUG_MODE ? 
-        wrap_choices_debug_in_html(choice_stimuli, jsPsych.timelineVariable('category'), jsPsych.timelineVariable('exemplar')) :
-        wrap_choices_in_html(choice_stimuli)
+        return IS_DEBUG ? 
+        wrap_choices_debug_in_html(choice_stimuli, jsPsych.timelineVariable('category'), jsPsych.timelineVariable('exemplar'), score) :
+        wrap_choices_in_html(choice_stimuli, score)
     },
     choices: ['ArrowLeft', 'ArrowRight'],
     data: {
@@ -148,6 +188,7 @@ var test_choices = {
         exemplar_ID: jsPsych.timelineVariable('exemplar'),
         category: jsPsych.timelineVariable('category')
     },
+    trial_duration: 4000,
     on_finish: function(data){
         data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
     }
@@ -155,26 +196,33 @@ var test_choices = {
 
 var feedback = {
     type: jsPsychHtmlKeyboardResponse,
-    trial_duration: 1000,
+    trial_duration: 1500,
     stimulus: function(){
         const last_trial = jsPsych.data.get().last(1).values()[0];
-        if(last_trial.correct){
-            return `<p> <font color="green" size="4vw"> Correct category! </font> <br> <br> <font color="green" size="7vw"> +10 points </font> </p>`;
+        if (last_trial.response) {
+            if(last_trial.correct){
+                score += 10;
+                return `<p> <font color="green" size="4vw"> Correct category! </font> <br> <br> <font color="green" size="7vw"> +10 points </font> </p>`;
+            } else {
+                //return `<p> <font size="4vw"> Wrong category! </font> <br> <br> <font color="red" size="7vw"> -10 points </font> </p>`;
+                return `<p> <font color="red" size="4vw"> Wrong category! </font> </p>`;
+            }
         } else {
-            //return `<p> <font size="4vw"> Wrong category! </font> <br> <br> <font color="red" size="7vw"> -10 points </font> </p>`;
-            return `<p> <font color="red" size="4vw"> Wrong category! </font> </p>`;
+            return `<p> <font color="red" size="5vw"> Time out! </font> <br> Please try to respond as quickly as possible. </p>`
         }
     },
     data: {task: 'feedback'}
 };
 
 var trials = {
-    timeline : [fixation, test_stim, test_choices, feedback],
+    timeline : [ITI, test_stim, blank, test_choices, feedback],
     timeline_variables : stimuli,
     randomize_order : true
 };
 timeline.push(trials)
 
-jatos.onLoad(() => {
-  jsPsych.run(timeline);
-});
+if (IS_ONLINE){
+    jatos.onLoad(() => {jsPsych.run(timeline);});
+}else{
+    jsPsych.run(timeline);
+}

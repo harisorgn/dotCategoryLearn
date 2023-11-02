@@ -130,7 +130,7 @@ def plot(P, sz_grid, filename, show=False, save=True):
     c = PatchCollection(dots, color='k')
     ax.add_collection(c)
 
-    lims = np.array([-6, 6]) + np.array([0, sz_grid[0]]) # assuming square grid
+    lims = np.array([-8, 8]) + np.array([0, sz_grid[0]]) # assuming square grid
     ax.set_xlim(*lims)
     ax.set_ylim(*lims)
     plt.axis('off')
@@ -147,13 +147,14 @@ N_dots = 7
 N_exemplars = 100
 sz_grid = (16, 16)
 
-llim_easy = 4
-ulim_easy = 5.5
-probs_easy = [0.59, 0.20, 0.16, 0.03, 0.02]
+llim_easy = 2
+ulim_easy = 4
+probs_easy = [0.2, 0.3, 0.4, 0.05, 0.05]
 
-llim_easy = 3
-ulim_easy = 4.5
-probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
+llim_hard = 2
+ulim_hard = 4
+#probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
+probs_hard = [0.0, 0.24, 0.16, 0.3, 0.3]
 
 Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_easy, ulim=ulim_easy)
 
