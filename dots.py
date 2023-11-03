@@ -147,26 +147,47 @@ N_dots = 7
 N_exemplars = 100
 sz_grid = (16, 16)
 
-llim_easy = 2
-ulim_easy = 4
+llim_easy = 3
+ulim_easy = 5
 probs_easy = [0.2, 0.3, 0.4, 0.05, 0.05]
 
-llim_hard = 2
-ulim_hard = 4
+llim_hard = 3
+ulim_hard = 5
 #probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
 probs_hard = [0.0, 0.24, 0.16, 0.3, 0.3]
 
-Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_easy, ulim=ulim_easy)
+Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_hard, ulim=ulim_hard)
 
 exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
     exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_easy)
 
-pack_name = gen_folder_name('./stimuli/pack')
+pack_name = gen_folder_name('./stimuli/pack', 'easy')
 os.mkdir(pack_name)
 
 for i in range(0, N_prototypes):
-    cat_name = gen_folder_name(pack_name + "/cat", 1)
+    cat_name = gen_folder_name(pack_name + "/cat")
+    os.mkdir(cat_name)
+
+    ID_prototype = cat_name.split("_")[-1]
+    file_name = cat_name + "/prot_" + ID_prototype
+    plot(Ps[i,:,:], sz_grid, file_name)
+
+    for j in range(0, N_exemplars):
+        file_name = cat_name + "/ex_" + ID_prototype + f"_{j+1}"
+        plot(exs[i,j,:,:], sz_grid, file_name)
+
+
+
+exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
+for i in range(0, N_prototypes):
+    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_hard)
+
+pack_name = gen_folder_name('./stimuli/pack', 'hard')
+os.mkdir(pack_name)
+
+for i in range(0, N_prototypes):
+    cat_name = gen_folder_name(pack_name + "/cat")
     os.mkdir(cat_name)
 
     ID_prototype = cat_name.split("_")[-1]
