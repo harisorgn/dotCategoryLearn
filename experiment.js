@@ -92,6 +92,15 @@ if (IS_ONLINE){
             jatos.endStudy(jsPsych.data.get().csv());
         }
     })
+    var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+    var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+    var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+    jsPsych.data.addProperties({
+        subject_id: subject_id,
+        study_id: study_id,
+        session_id: session_id
+    });
 }else{
     var jsPsych = initJsPsych({
         on_finish: function() {
@@ -121,7 +130,7 @@ timeline.push(preload);
 
 var welcome = {
   type: jsPsychHtmlKeyboardResponse,
-  stimulus: "Welcome to the dotCategoryLearn experiment! Press any key to continue.",
+  stimulus: "Welcome to the Category Learning experiment! Press any key to continue.",
   data: {task: 'welcome'}
 };
 timeline.push(welcome)
