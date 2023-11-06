@@ -72,8 +72,14 @@ function exemplar_stimuli(indices, stim_path, pack_ID, category){
     );
 }
 
+function rand_in_range(minVal,maxVal)
+{
+  var randVal = minVal+(Math.random()*(maxVal-minVal));
+  return Math.round(randVal);
+}
+
 const IS_DEBUG = false
-const IS_ONLINE = true
+const IS_ONLINE = false
 const time_experiment = 10; // minutes
 const T_exp = time_experiment * 60 * 1000; // ms 
 const N_exemplars = 100;
@@ -102,9 +108,11 @@ if (IS_ONLINE){
         session_id: session_id
     });
 }else{
+    ID = rand_in_range(1001, 9999)
+
     var jsPsych = initJsPsych({
         on_finish: function() {
-            jsPsych.data.get().localSave('csv','tst.csv');
+            jsPsych.data.get().localSave('csv',`results_${ID}.csv`);
         }
     })
 }
