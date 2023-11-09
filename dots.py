@@ -156,13 +156,13 @@ ulim_hard = 5
 #probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
 probs_hard = [0.0, 0.24, 0.16, 0.3, 0.3]
 
-Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_hard, ulim=ulim_hard)
+Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_easy, ulim=ulim_easy)
 
 exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
     exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_easy)
 
-pack_name = gen_folder_name('./stimuli/pack', 'easy')
+pack_name = gen_folder_name('./stimuli/pack', 1)
 os.mkdir(pack_name)
 
 for i in range(0, N_prototypes):
@@ -178,7 +178,7 @@ for i in range(0, N_prototypes):
         plot(exs[i,j,:,:], sz_grid, file_name)
 
 
-
+"""
 exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
     exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_hard)
@@ -197,3 +197,4 @@ for i in range(0, N_prototypes):
     for j in range(0, N_exemplars):
         file_name = cat_name + "/ex_" + ID_prototype + f"_{j+1}"
         plot(exs[i,j,:,:], sz_grid, file_name)
+"""
