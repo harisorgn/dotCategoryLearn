@@ -151,13 +151,13 @@ timeline.push(welcome)
 
 var instructions = {
   type: jsPsychHtmlKeyboardResponse,
-  stimulus: `<p>You will be shown images and each image will contain a set of black dots. Each image will belong to one of two categories: category A or category B.
-            <br>You will not know in advance which category the given collection of dots belongs to.</p>
-            <p>After you see an image you will be asked to categorize it into <b>category A (by pressing the left arrow key)</b> or <b>category B (by pressing the right arrow key)</b>
-            as quickly as possible.</p>
-            <p>After you make a choice you will receive feedback telling you whether you matched the image to the correct category or not.</p>
-            <p>Your goal is to categorize as many sets of dots correctly as possible.</p>
-            <p>Press any key to begin.</p>`,
+  stimulus: `<p>You will be shown images of patterns of black dots.  Some are category A, some are category B;.
+             <br>You will not know in advance which category a specific pattern belongs to.</p>
+             <p>After you see an image, you will be asked to guess its category <b>(left arrow for category A, right arrow for category B)</b></p>
+             <p>Try to guess the category correctly, but also try to make the correct guess as quickly as you can. </p>
+             <p>After you choose, the screen will show you what the correct category was.</p>
+             <p>Your goal is to keep guessing the categories correctly.</p>
+             <p>Press any key to begin.</p>`,
   data: {task: 'introduction'}
 };
 timeline.push(instructions)
