@@ -98,14 +98,20 @@ if (IS_ONLINE){
             jatos.endStudy(jsPsych.data.get().csv());
         }
     })
-    var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
-    var study_id = jsPsych.data.getURLVariable('STUDY_ID');
-    var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+    //var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+    //var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+    //var session_id = jsPsych.data.getURLVariable('SESSION_ID');
 
-    jsPsych.data.addProperties({
-        subject_id: subject_id,
-        study_id: study_id,
-        session_id: session_id
+    jatos.onLoad(function(){
+        var subj_id = jatos.urlQueryParameters.PROLIFIC_PID
+        var std_id = jatos.urlQueryParameters.STUDY_ID
+        var sess_id = jatos.urlQueryParameters.SESSION_ID
+
+        jsPsych.data.addProperties({
+            subject_id: subj_id,
+            study_id: std_id,
+            session_id: sess_id
+        });
     });
 }else{
     ID = rand_in_range(1001, 9999)
@@ -161,11 +167,9 @@ var ITI = {
     stimulus: function (){
         return `
             ${wrap_score_in_html(score)}
-            <div style="font-size:60px;">+</div>
+            <div> Please press any button to continue to the next trial.</div>
         `
     },
-    choices: "NO_KEYS",
-    trial_duration: 350,
     data: {task: 'ITI'}
 };
 
