@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <style> 
+    .stim {
+        width: 28vw;
+        animation-name: unblur;
+        animation-duration: 1s;
+    }
+    .left_choice {
+        position: absolute;
+        left: 18vw;
+        top: 28vh;
+        width: 20vw;
+    }
+    .right_choice {
+        position: absolute;
+        right: 18vw;
+        top: 30vh;
+        width: 20vw;
+    }
+    .left_stim {
+        position: absolute;
+        left: 18vw;
+        top: 20vh;
+        width: 24vw;
+    }
+    .right_stim {
+        position: absolute;
+        right: 18vw;
+        top: 20vh;
+        width: 24vw;
+    }
+
+    @keyframes unblur {
+      from {filter: blur(10px);}
+      to {filter: blur(0px);}
+    }
+
+  </style>
+  <head>
+    <title>My experiment</title>
+    <script src="https://unpkg.com/jspsych@7.3.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@1.1.2"></script>
+    <script src="jatos.js"></script>
+    <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="experiment.js"></script>
+  </head>
+</html>
