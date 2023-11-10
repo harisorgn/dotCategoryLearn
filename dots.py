@@ -63,11 +63,11 @@ def gen_prototype(N_dots, sz_grid):
     P = np.zeros((N_dots, 2))
 
     for i in range(N_dots):
-        x = np.random.randint(0, width)
-        y = np.random.randint(0, height)
+        x = np.random.uniform(0, width)
+        y = np.random.uniform(0, height)
         while check_within([x, y], P[:i, :]):
-            x = np.random.randint(0, width)
-            y = np.random.randint(0, height)
+            x = np.random.uniform(0, width)
+            y = np.random.uniform(0, height)
         P[i] = [x, y]    
 
     return P
@@ -95,7 +95,7 @@ def gen_exemplar(prototype, probs):
 
         dot_exemplar = np.copy(dot)
         dot_exemplar[idx_offset] += np.random.choice([-offset, offset])
-        dot_exemplar[not idx_offset] += np.random.randint(-offset, offset + 1)
+        dot_exemplar[not idx_offset] += np.random.uniform(-offset, offset)
 
         while check_within(dot_exemplar, exemplar[:i]):
             offset = np.random.choice(range(1, len(probs) + 1), p = probs)
@@ -103,7 +103,7 @@ def gen_exemplar(prototype, probs):
 
             dot_exemplar = np.copy(dot)
             dot_exemplar[idx_offset] += np.random.choice([-offset, offset])
-            dot_exemplar[not idx_offset] += np.random.randint(-offset, offset + 1)
+            dot_exemplar[not idx_offset] += np.random.uniform(-offset, offset)
         exemplar[i, :] = dot_exemplar
 
     return exemplar
@@ -142,25 +142,20 @@ def plot(P, sz_grid, filename, show=False, save=True):
 
     plt.close(fig)
 
-N_prototypes = 4
+N_prototypes = 2
 N_dots = 7
 N_exemplars = 100
-sz_grid = (16, 16)
+sz_grid = (20, 20)
 
-llim_easy = 3
-ulim_easy = 5
-probs_easy = [0.2, 0.3, 0.4, 0.05, 0.05]
+llim = 4
+ulim = 5.5
+probs = [0.07, 0.39, 0.51, 0.03, 0.0]
 
-llim_hard = 3
-ulim_hard = 5
-#probs_hard = [0.2, 0.3, 0.4, 0.05, 0.05] 
-probs_hard = [0.0, 0.24, 0.16, 0.3, 0.3]
-
-Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim_easy, ulim=ulim_easy)
+Ps = gen_prototypes(N_prototypes, N_dots, sz_grid, llim=llim, ulim=ulim)
 
 exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
 for i in range(0, N_prototypes):
-    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_easy)
+    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs)
 
 pack_name = gen_folder_name('./stimuli/pack', 1)
 os.mkdir(pack_name)
@@ -176,25 +171,3 @@ for i in range(0, N_prototypes):
     for j in range(0, N_exemplars):
         file_name = cat_name + "/ex_" + ID_prototype + f"_{j+1}"
         plot(exs[i,j,:,:], sz_grid, file_name)
-
-
-"""
-exs = np.zeros((N_prototypes, N_exemplars, N_dots, 2))
-for i in range(0, N_prototypes):
-    exs[i,:,:,:] = gen_exemplars(N_exemplars, Ps[i,:,:], probs_hard)
-
-pack_name = gen_folder_name('./stimuli/pack', 'hard')
-os.mkdir(pack_name)
-
-for i in range(0, N_prototypes):
-    cat_name = gen_folder_name(pack_name + "/cat")
-    os.mkdir(cat_name)
-
-    ID_prototype = cat_name.split("_")[-1]
-    file_name = cat_name + "/prot_" + ID_prototype
-    plot(Ps[i,:,:], sz_grid, file_name)
-
-    for j in range(0, N_exemplars):
-        file_name = cat_name + "/ex_" + ID_prototype + f"_{j+1}"
-        plot(exs[i,j,:,:], sz_grid, file_name)
-"""

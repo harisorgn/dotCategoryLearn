@@ -79,17 +79,18 @@ function rand_in_range(minVal,maxVal)
 }
 
 const IS_DEBUG = false
-const IS_ONLINE = false
+const IS_ONLINE = true
 const time_experiment = 10; // minutes
 const T_exp = time_experiment * 60 * 1000; // ms 
 const N_exemplars = 100;
+const N_practice_trials = 10;
 
 var is_time_out = false;
 var score = 0;
 
 var timeline = []; 
 
-var pack_ID = "easy"
+var pack_ID = "1"
 var stim_path = "./stimuli/" ;
 
 if (IS_ONLINE){
@@ -98,10 +99,6 @@ if (IS_ONLINE){
             jatos.endStudy(jsPsych.data.get().csv());
         }
     })
-    //var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
-    //var study_id = jsPsych.data.getURLVariable('STUDY_ID');
-    //var session_id = jsPsych.data.getURLVariable('SESSION_ID');
-
     jatos.onLoad(function(){
         var subj_id = jatos.urlQueryParameters.PROLIFIC_PID
         var std_id = jatos.urlQueryParameters.STUDY_ID
@@ -130,14 +127,29 @@ setTimeout(
     T_exp
 );
 
-const stimuli_cat_1 = exemplar_stimuli(range(1, N_exemplars), stim_path, pack_ID, 1);
-const stimuli_cat_2 = exemplar_stimuli(range(1, N_exemplars), stim_path, pack_ID, 2);
-const stimuli = stimuli_cat_1.concat(stimuli_cat_2);
+const r = range(1, N_exemplars);
+
+const idx_cat_1_training = jsPsych.randomization.sampleWithoutReplacement(r, Math.floor(N_practice_trials/2));
+const idx_cat_1_test = r.filter(x => !idx_cat_1_training.includes(x));
+const stimuli_cat_1_training = exemplar_stimuli(idx_cat_1_training, stim_path, pack_ID, 1);
+const stimuli_cat_1_test = exemplar_stimuli(idx_cat_1_test, stim_path, pack_ID, 1);
+
+const idx_cat_2_training = jsPsych.randomization.sampleWithoutReplacement(r, Math.floor(N_practice_trials/2));
+const idx_cat_2_test = r.filter(x => !idx_cat_2_training.includes(x));
+const stimuli_cat_2_training = exemplar_stimuli(idx_cat_2_training, stim_path, pack_ID, 2);
+const stimuli_cat_2_test = exemplar_stimuli(idx_cat_2_test, stim_path, pack_ID, 2);
+
+const stimuli_training = stimuli_cat_1_training.concat(stimuli_cat_2_training);
+const stimuli_test = stimuli_cat_1_test.concat(stimuli_cat_2_test);
+
+var choice_stimuli = [stim_path + "A.png", stim_path + "B.png"]
 
 var preload = {
     type: jsPsychPreload,
     images: function(){
-        stimuli.map(x => x.stimulus)
+        stimuli = stimuli_test.concat(stimuli_training)
+        s = stimuli.map(x => x.stimulus)
+        s.concat(choice_stimuli)
     }
 };
 timeline.push(preload);
@@ -149,18 +161,31 @@ var welcome = {
 };
 timeline.push(welcome)
 
-var instructions = {
+var intro_1 = {
   type: jsPsychHtmlKeyboardResponse,
-  stimulus: `<p>You will be shown images of patterns of black dots.  Some are category A, some are category B;.
-             <br>You will not know in advance which category a specific pattern belongs to.</p>
-             <p>After you see an image, you will be asked to guess its category <b>(left arrow for category A, right arrow for category B)</b></p>
-             <p>Try to guess the category correctly, but also try to make the correct guess as quickly as you can. </p>
-             <p>After you choose, the screen will show you what the correct category was.</p>
-             <p>Your goal is to keep guessing the categories correctly.</p>
-             <p>Press any key to begin.</p>`,
-  data: {task: 'introduction'}
+  stimulus: `
+            <p>You will be shown images of patterns of black dots.  Some are category A, some are category B.
+            <br>You will not know in advance which category a specific pattern belongs to.</p>
+            <p>After you see an image, you will be asked to guess its category <b>(left arrow for category A, right arrow for category B)</b></p>
+            <p>Try to guess the category correctly, but also try to make the correct guess as quickly as you can. </p>
+            <p>After you choose, the screen will show you what the correct category was.</p>
+            <p><b>You will receive a bonus payment up to $2 depending on your accuracy!</b>
+            <p>Press any key to continue.</p>
+            `,
+  data: {task: 'introduction_1'}
 };
-timeline.push(instructions)
+timeline.push(intro_1)
+
+var intro_2 = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+            <p> <b>The first 10 trials are a practice round that will not count towards your score and bonus payment.</b></p>
+            <p> You will be notified when practice finishes and the test begins. </p>
+            <p> Press any key to begin the practice round.</p>
+            `,
+    data: {task: 'introduction_2'}
+  };
+timeline.push(intro_2)
 
 var ITI = {
     type: jsPsychHtmlKeyboardResponse,
@@ -179,7 +204,7 @@ var test_stim = {
         return wrap_stim_in_html(jsPsych.timelineVariable('stimulus'), score)
     },
     choices: "NO_KEYS",
-    trial_duration: 1000,
+    trial_duration: 600,
     data: {task : 'stimulus'}
 };
 
@@ -191,8 +216,6 @@ var blank = {
     choices: "NO_KEYS",
     trial_duration: 1000,
 };
-
-var choice_stimuli = [stim_path + "A.png", stim_path + "B.png"]
 
 var test_choices = {
     type: jsPsychHtmlKeyboardResponse,
@@ -235,9 +258,45 @@ var feedback = {
     data: {task: 'feedback'}
 };
 
+var feedback_training = {
+    type: jsPsychHtmlKeyboardResponse,
+    trial_duration: 1500,
+    stimulus: function(){
+        const last_trial = jsPsych.data.get().last(1).values()[0];
+        if (last_trial.response) {
+            if(last_trial.correct){
+                return `<p> <font color="green" size="4vw"> Correct category! </font> </p>`;
+            } else {
+                return `<p> <font color="red" size="4vw"> Wrong category! </font> </p>`;
+            }
+        } else {
+            return `<p> <font color="red" size="5vw"> Time out! </font> <br> Please try to respond as quickly as possible. </p>`
+        }
+    },
+    data: {task: 'feedback'}
+};
+
+var trials_training = {
+    timeline : [ITI, test_stim, blank, test_choices, feedback_training],
+    timeline_variables : stimuli_training,
+    randomize_order : true
+};
+timeline.push(trials_training)
+
+var intermission = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+            <b> <p> The practice round has finished. For the rest of the experiment you will receive points for every correct answer.</p>
+            <p> You will receive a bonus payment up to $2 according to your points after the end of the experiment. </p> </b>
+            <p> Press any key to begin the test. </p>
+            `,
+    data: {task: 'intermission'}
+  };
+timeline.push(intermission)
+
 var trials = {
     timeline : [ITI, test_stim, blank, test_choices, feedback],
-    timeline_variables : stimuli,
+    timeline_variables : stimuli_test,
     randomize_order : true
 };
 timeline.push(trials)
