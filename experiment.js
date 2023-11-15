@@ -31,7 +31,7 @@ function wrap_score_in_html(score){
     txt = `
         <div style="text-align: center; position: fixed; top: 5vh; left: 40vw;">
             <div style="margin:0 auto; width: 20vw; top: 8vh; font-size: 1vw"> 
-                Current score : <font color="green"> ${score} points </font>
+            <font color="green"> Bonus : $${score} </font>
             </div>
         </div>
     `;
@@ -122,7 +122,7 @@ if (IS_ONLINE){
 
 setTimeout(
     function(){
-        jsPsych.endExperiment(`<p> The experiment has concluded. <br> Thank you for participating! </p>`);
+        jsPsych.endExperiment(`<p> The experiment has concluded. <br> Thank you for participating! <br> <font color="green"> You have won a $${score} bonus! </font></p>`);
     }, 
     T_exp
 );
@@ -167,9 +167,9 @@ var intro_1 = {
             <p>You will be shown images of patterns of black dots.  Some are category A, some are category B.
             <br>You will not know in advance which category a specific pattern belongs to.</p>
             <p>After you see an image, you will be asked to guess its category <b>(left arrow for category A, right arrow for category B)</b></p>
-            <p>Try to guess the category correctly, but also try to make the correct guess as quickly as you can. </p>
-            <p>After you choose, the screen will show you what the correct category was.</p>
-            <p><b>You will receive a bonus payment up to $2 depending on your accuracy!</b>
+            <p>After you choose, the screen will show you whether you were correct or not.</p>
+            <p><b>You will receive a bonus payment of $0.05 for each correct answer!</b></p>
+            <p> So you can increase your bonus by guessing correctly, and by guessing as quickly as possible so you move on to the next image sooner.</p>
             <p>Press any key to continue.</p>
             `,
   data: {task: 'introduction_1'}
@@ -179,7 +179,7 @@ timeline.push(intro_1)
 var intro_2 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
-            <p> <b>The first 10 trials are a practice round that will not count towards your score and bonus payment.</b></p>
+            <p> <b>The first 10 trials are a practice round that will not count towards your bonus payment.</b></p>
             <p> You will be notified when practice finishes and the test begins. </p>
             <p> Press any key to begin the practice round.</p>
             `,
@@ -245,8 +245,9 @@ var feedback = {
         const last_trial = jsPsych.data.get().last(1).values()[0];
         if (last_trial.response) {
             if(last_trial.correct){
-                score += 10;
-                return `<p> <font color="green" size="4vw"> Correct category! </font> <br> <br> <font color="green" size="7vw"> +10 points </font> </p>`;
+                score += 0.05;
+                score = Math.round(score * 100) / 100;
+                return `<p> <font color="green" size="4vw"> Correct category! </font> <br> <br> <font color="green" size="7vw"> + $0.05 </font> </p>`;
             } else {
                 //return `<p> <font size="4vw"> Wrong category! </font> <br> <br> <font color="red" size="7vw"> -10 points </font> </p>`;
                 return `<p> <font color="red" size="4vw"> Wrong category! </font> </p>`;
@@ -255,7 +256,9 @@ var feedback = {
             return `<p> <font color="red" size="5vw"> Time out! </font> <br> Please try to respond as quickly as possible. </p>`
         }
     },
-    data: {task: 'feedback'}
+    data: function(){
+        return {task: 'feedback', bonus: score}
+    }
 };
 
 var feedback_training = {
@@ -273,7 +276,9 @@ var feedback_training = {
             return `<p> <font color="red" size="5vw"> Time out! </font> <br> Please try to respond as quickly as possible. </p>`
         }
     },
-    data: {task: 'feedback'}
+    data: function(){
+        return {task: 'feedback', bonus: score}
+    }
 };
 
 var trials_training = {
@@ -286,8 +291,8 @@ timeline.push(trials_training)
 var intermission = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
-            <b> <p> The practice round has finished. For the rest of the experiment you will receive points for every correct answer.</p>
-            <p> You will receive a bonus payment up to $2 according to your points after the end of the experiment. </p> </b>
+            <b> <p> The practice round has finished.</p>
+            <b> For the rest of the experiment you will receive a $0.05 bonus for each correct answer!</b>
             <p> Press any key to begin the test. </p>
             `,
     data: {task: 'intermission'}
